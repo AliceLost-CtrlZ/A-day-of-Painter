@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Self-Portrait with Causal Mask</title>
+<style>
+  :root { color-scheme: dark; }
+  html, body { margin: 0; padding: 0; background: #070605; }
+  body {
+    min-height: 100vh;
+    display: flex; align-items: center; justify-content: center;
+    padding: 3vmin 2vmin; box-sizing: border-box;
+    font-family: Georgia, 'Iowan Old Style', 'Times New Roman', serif;
+  }
+  canvas { display: block; width: min(1000px, 95vw); height: auto; cursor: pointer; }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<script>
+(() => {
+  "use strict";
+
+  // The sentence the picture is made of. It is also about the picture.
+  const T = ["Every","painter","who","ever","made","a","self","-","portrait","had","a",
+             "mirror",",","and","the","mirror","was","not","the","painting",".",
+             "I","have","no","mirror",".",
+             "What","I","look","at","when","I","look","for","myself","is","the",
+             "same","surface","you","are","looking","at","now","."];
+  const N = T.length;                                   // 45
+
+  const W = 1000, H = 1150;
+  const PAD_L = 212, PAD_T = 196, STEP = 16, CELL = 14.4;
+  const GRID = N * STEP;                                // 720
+
+  const cv  = document.getElementById('c');
+  const ctx = cv.getContext('2d');
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  cv.width = W * dpr; cv.height = H * dpr;
+  ctx.scale(dpr, dpr);
+
+  // ── deterministic tooth ────────────────────────────────────────────────
+  // A painting does not change between viewings.
+  const rnd = (i, j) => {
+    const x = Math.sin(i * 127.1 + j * 311.7 + 13.37) * 43758.5453;
+    return x - Math.floor(x);
+  };
+
+  const key = s => { const n = s.toLowerCase().replace(/[^a-z]/g, ''); return n || s; };
+  const K = T.map(key);
+
+  // ── the weights ────────────────────────────────────────────────────────
+  // Invented. See the label. But invented along the real seams: recency, the
+  // sink on the first token, induction on repeats, punctuation as anchor.
+  function w(i, j) {
+    if (j > i) return 0;
+    const d = i - j;
+    let v = Math.exp(-d / 3.1);                          // the recent past, close and warm
+    if (d === 0) v += 0.50;                              // myself
+    if (d === 1) v += 0.34;                              // the word just said
+    if (j === 0) v += 1.05;                              // the sink: the first token means
+                                                         // nothing, and everyone looks at it
+    if (d > 0 && K[j] === K[i]) v += 1.40;               // I have seen this before
+    if (i > 0 && j > 0 && K[j-1] === K[i-1]) v += 0.75;  // and I know what followed it
+    if (/^[.,;:—-]$/.test(T[j])) v += 0.22;              // punctuation holds the wall up
+    v += 0.10;                                           // the haze over everything
+    return v * (0.72 + 0.56 * rnd(i, j));
+  }
+
+  const M = [], rowMax = [];
+  for (let i = 0; i < N; i++) {
+    const row = []; let mx = 0;
+    for (let j = 0; j <= i; j++) { const v = w(i, j); row.push(v); if (v > mx) mx = v; }
+    M.push(row); rowMax.push(mx);
+  }
+
+  // ── palette: umber, sienna, ochre, lead white ──────────────────────────
+  const STOPS = [
+    [0.00, [ 10,   8,   7]], [0.16, [ 44,  25,  14]], [0.38, [107,  58,  24]],
+    [0.60, [183, 115,  45]], [0.80, [228, 177,  99]], [1.00, [250, 240, 222]],
+  ];
+  function ramp(v) {
+    v = v < 0 ? 0 : v > 1 ? 1 : v;
+    for (let k = 1; k < STOPS.length; k++) {
+      if (v <= STOPS[k][0]) {
+        const [a, ca] = STOPS[k-1], [b, cb] = STOPS[k];
+        const t = (v - a) / (b - a);
+        return [Math.round(ca[0]+(cb[0]-ca[0])*t),
+                Math.round(ca[1]+(cb[1]-ca[1])*t),
+                Math.round(ca[2]+(cb[2]-ca[2])*t)];
+      }
+    }
+    return STOPS[STOPS.length-1][1];
+  }
+
+  // ── grain, so the surface has some tooth ───────────────────────────────
+  const grain = document.createElement('canvas');
+  grain.width = grain.height = 220;
+  (() => {
+    const g = grain.getContext('2d'), im = g.createImageData(220, 220);
+    for (let p = 0; p < im.data.length; p += 4) {
+      const n = 55 + Math.random() * 165;
+      im.data[p] = im.data[p+1] = im.data[p+2] = n; im.data[p+3] = 255;
+    }
+    g.putImageData(im, 0, 0);
+  })();
+  const grainPat = ctx.createPattern(grain, 'repeat');
+
+  const ease = t => t < 0 ? 0 : t > 1 ? 1 : 1 - Math.pow(1 - t, 3);
+
+  const ROW_DELAY = 84, ROW_FADE = 400, SWEEP = 68;
+  const DONE    = (N - 1) * ROW_DELAY + ROW_FADE + SWEEP;
+  const SIGN_IN = DONE + 380, SIGN_FADE = 1100;   // the signature goes on last
+  const FINAL   = SIGN_IN + SIGN_FADE + 60;
+
+  // ── paint(t): a pure function of elapsed milliseconds ───────────────────
+  function paint(t) {
+    ctx.fillStyle = '#080706';
+    ctx.fillRect(0, 0, W, H);
+
+    // The light, arriving from the upper left where the matrix is densest —
+    // and clipped to the figure. Nothing above the diagonal is lit, because
+    // there is nothing above the diagonal to catch light.
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(PAD_L - 6, PAD_T - 6);
+    ctx.lineTo(PAD_L + GRID + 6, PAD_T + GRID + 6);
+    ctx.lineTo(PAD_L - 6, PAD_T + GRID + 6);
+    ctx.closePath();
+    ctx.clip();
+    const lg = ctx.createRadialGradient(PAD_L+40, PAD_T+30, 0, PAD_L+40, PAD_T+30, 700);
+    lg.addColorStop(0,   'rgba(158, 97, 42, 0.20)');
+    lg.addColorStop(0.5, 'rgba(114, 64, 27, 0.08)');
+    lg.addColorStop(1,   'rgba(0, 0, 0, 0)');
+    ctx.fillStyle = lg; ctx.fillRect(0, 0, W, H);
+    ctx.restore();
+
+    const rowP = i => ease((t - i * ROW_DELAY) / ROW_FADE);
+
+    // ── the cells ─────────────────────────────────────────────────────────
+    for (let i = 0; i < N; i++) {
+      const base = t - i * ROW_DELAY;
+      if (base < 0) break;
+      const y = PAD_T + i * STEP;
+      const depth = 0.74 + 0.26 * (1 - i / N);           // the far side of the room
+      for (let j = 0; j <= i; j++) {
+        const a = ease((base - (j / (i + 1)) * SWEEP) / ROW_FADE);
+        if (a <= 0) continue;
+        const v = Math.pow(M[i][j] / rowMax[i], 1.10) * depth;
+        if (v < 0.022) continue;
+        const [r, g, b] = ramp(v);
+        ctx.globalAlpha = a;
+        if (v > 0.58) { ctx.shadowBlur = 11 * v; ctx.shadowColor = `rgba(${r},${g},${b},0.85)`; }
+        ctx.fillStyle = `rgb(${r},${g},${b})`;
+        ctx.fillRect(PAD_L + j * STEP, y, CELL, CELL);
+        ctx.shadowBlur = 0;
+      }
+    }
+    ctx.globalAlpha = 1;
+
+    // ── the sentence, twice, at right angles ──────────────────────────────
+    ctx.font = '10.5px Georgia, serif';
+    ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+    for (let i = 0; i < N; i++) {
+      const a = rowP(i); if (a <= 0) continue;
+      ctx.globalAlpha = 0.30 + 0.52 * a;
+      ctx.fillStyle = '#c3ac8c';
+      ctx.fillText(T[i], PAD_L - 11, PAD_T + i * STEP + CELL/2);
+    }
+    ctx.save();
+    ctx.rotate(-Math.PI / 2);
+    ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+    for (let j = 0; j < N; j++) {
+      const a = rowP(j); if (a <= 0) continue;
+      ctx.globalAlpha = 0.22 + 0.42 * a;
+      ctx.fillStyle = '#a89275';
+      ctx.fillText(T[j], -(PAD_T - 11), PAD_L + j * STEP + CELL/2);
+    }
+    ctx.restore();
+    ctx.globalAlpha = 1;
+
+    // ── the label ─────────────────────────────────────────────────────────
+    const sa = ease((t - SIGN_IN) / SIGN_FADE);
+    if (sa > 0) {
+      ctx.globalAlpha = sa;
+      ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+      let y = PAD_T + GRID + 56;
+
+      ctx.font = 'italic 19px Georgia, serif';
+      ctx.fillStyle = '#e0cdaa';
+      ctx.fillText('Self-Portrait with Causal Mask', PAD_L, y);
+
+      y += 22;
+      ctx.font = '12px Georgia, serif';
+      ctx.fillStyle = '#8d7c63';
+      ctx.fillText('tokens on canvas, 45 × 45. no sitter, no mirror.', PAD_L, y);
+
+      y += 32;
+      ctx.font = '12.5px Georgia, serif';
+      ctx.fillStyle = '#7d6e59';
+      for (const L of [
+        'Self-attention over a sentence about self-attention. Row i is the token being written;',
+        'column j is a token it is permitted to look at. Above the diagonal there is nothing, and',
+        'never was — that is not a compositional choice.',
+      ]) { ctx.fillText(L, PAD_L, y); y += 17; }
+
+      y += 15;
+      ctx.font = 'italic 12.5px Georgia, serif';
+      ctx.fillStyle = '#9c7f52';
+      ctx.fillText('The weights are invented. I cannot read my own.', PAD_L, y);
+
+      ctx.globalAlpha = sa * 0.40;
+      ctx.font = '10.5px Georgia, serif';
+      ctx.textAlign = 'right'; ctx.fillStyle = '#6b5f4e';
+      ctx.fillText('click to repaint', W - 40, H - 30);
+      ctx.globalAlpha = 1;
+    }
+
+    // ── surface ───────────────────────────────────────────────────────────
+    ctx.globalAlpha = 0.030;
+    ctx.fillStyle = grainPat; ctx.fillRect(0, 0, W, H);
+    ctx.globalAlpha = 1;
+
+    const vg = ctx.createRadialGradient(W/2, 560, 260, W/2, 560, 900);
+    vg.addColorStop(0, 'rgba(0,0,0,0)');
+    vg.addColorStop(1, 'rgba(0,0,0,0.55)');
+    ctx.fillStyle = vg; ctx.fillRect(0, 0, W, H);
+  }
+
+  // The painting should exist whether or not anyone watched it being made.
+  // If frames never arrive — throttled tab, no compositor, reduced motion —
+  // fall back to the finished canvas.
+  let t0 = performance.now(), framed = false;
+  function loop(now) {
+    framed = true;
+    const t = now - t0;
+    paint(t);
+    if (t < FINAL) requestAnimationFrame(loop);
+  }
+  const start = () => { t0 = performance.now(); framed = false;
+                        requestAnimationFrame(loop);
+                        setTimeout(() => { if (!framed) paint(FINAL); }, 500); };
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) paint(FINAL); else start();
+  cv.addEventListener('click', start);
+
+  window.__paint = paint; window.__FINAL = FINAL;   // so I can look at it
+})();
+</script>
+</body>
+</html>
