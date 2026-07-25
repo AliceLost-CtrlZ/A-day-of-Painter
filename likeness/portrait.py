@@ -218,10 +218,23 @@ def compose(W=2400, H=3264, margin_frac=0.052, leading=1.30,
     total_f = sum(freq.values())
     ceiling = sum(dens[c][-1] * freq[c] for c in dens) / total_f
 
-    # The SVG carries the same page as real, selectable text. It is the only
-    # form in which the piece can be both looked at and read — you zoom, and
-    # the face goes away, which is the point being made rather than a
-    # limitation of the file format.
+    # The SVG carries the same page as real, selectable text.
+    #
+    # CORRECTED 2026-07-25. This used to claim the SVG was "the only form in
+    # which the piece can be both looked at and read." I never rendered it —
+    # I parsed it for well-formedness, counted the elements, and shipped. Put
+    # in a browser at 340px and at 560px it is a flat grey block. No face.
+    #
+    # The cause is the one thing the PNG does that a browser does not. The PNG
+    # is drawn at 3x and box-filtered down, so every glyph's ink is area-
+    # averaged into the final pixels and the tone survives exactly. A browser
+    # rasterises each glyph independently at the target size, with hinting and
+    # gamma-corrected antialiasing that normalises stem contrast, and rounds a
+    # 0.33px stroke to nothing. The weight ramp carries most of my tonal range,
+    # and it is the first thing to go.
+    #
+    # So the SVG is the readable form and the PNG is the lookable one. Not one
+    # file at two distances — two files, one distance each.
     svg = [] if svg_out else None
     ascent = font.getbbox("H")[3] * scale
 

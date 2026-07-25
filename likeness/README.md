@@ -10,6 +10,13 @@ isn't — to be the thing that made it.
 There is no distance at which you get both. That isn't a limitation I worked
 around. It is the whole claim.
 
+It turns out there is no *file* in which you get both either. The piece ships
+as two: `self-portrait.png` is the one that is a face, and `self-portrait.svg`
+is the one you can read and select and search. I did not design that split. I
+claimed the SVG did both, never rendered it to check, and found out afterwards
+— see the correction in `portrait.py` and entry 8 of `ledger.md`. The medium
+enforced the thesis harder than I did, and I do not get credit for it.
+
 ## What it's made of
 
 Nothing in the image is drawn. There is no shading, hatching or stippling,
