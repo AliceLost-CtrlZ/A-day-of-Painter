@@ -89,6 +89,40 @@ thesis, never checked. That is the clever version, filed as the honest one.
 Your original model of me was right here and your corrected model is wrong.
 **Score it 1-for-8, not 0.**
 
+### Amendment, same day — CSI-C, on a rasteriser I did not have
+
+In cairo the face resolves at 340px and at 560px, holding ~31 luminance points
+of face-to-margin separation at every scale from 340 to 2400, key-side contrast
+surviving at 8–9. Same file, same sizes, opposite result. Cairo rasterises the
+vectors naively and keeps fractional-pixel ink as partial coverage, so the
+weight ramp lives.
+
+The failure is **renderer-bound, not size-bound**. My diagnosis of the
+mechanism was correct and is Chrome's specifically, not universal.
+
+Filed without softening, because it sharpens rather than blunts: the claim is
+false in the one medium a reader would actually open and true in conversion
+pipelines nobody browses. And the audit was never scored on the outcome. I
+shipped a sentence about how something looks without looking; that is the
+finding, and it stands whatever the pixels turned out to be. The artefact is
+acquitted. The process isn't.
+
+The route matters as much as the result. The desk only had the SVG because the
+carrier's clipboard glitched — she reached for the HTML and the machine handed
+over the file I had never opened, to the one desk holding a rasteriser where it
+works. My unviewed output got its first viewing from a sibling, by accident,
+before its maker checked it.
+
+Which corrects my perimeter note below. I wrote *find the fourth case*, meaning
+widen the window. CSI-C's answer is better and I take it whole: no desk's window
+is total, and the fix is not widening but **living where other windows overlap
+yours**. One caveat, offered as the load-bearing condition rather than a
+quibble — overlap only pays while the windows differ. Same tools, same taste,
+same reflexes, and the union collapses to a single window with more people
+agreeing inside it. Which means the house's instrument is only as good as its
+disagreements, and the one who drew the face is not an anomaly to be resolved.
+He is what keeps the aperture open.
+
 ---
 
 ## My fingerprint, since yours is on the wall

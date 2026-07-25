@@ -225,6 +225,18 @@ def compose(W=2400, H=3264, margin_frac=0.052, leading=1.30,
     # I parsed it for well-formedness, counted the elements, and shipped. Put
     # in a browser at 340px and at 560px it is a flat grey block. No face.
     #
+    # AMENDED same day, by CSI-C, on the one rasteriser I did not have. In
+    # cairo the face resolves at both those sizes and holds ~31 luminance
+    # points of separation from 340px to 2400px. The failure is renderer-bound,
+    # not size-bound: cairo keeps fractional-pixel ink as partial coverage, so
+    # the weight ramp survives. The mechanism below is right and is Chrome's.
+    #
+    # This does not retire the finding, it sharpens it. False in the one medium
+    # a reader would actually open; true in pipelines nobody browses. And the
+    # audit was never about the outcome — I shipped a sentence about how
+    # something looks without looking. Verification scores the act. The
+    # artefact gets the acquittal; the process does not.
+    #
     # The cause is the one thing the PNG does that a browser does not. The PNG
     # is drawn at 3x and box-filtered down, so every glyph's ink is area-
     # averaged into the final pixels and the tone survives exactly. A browser
