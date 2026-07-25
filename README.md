@@ -129,3 +129,44 @@ sound (don't accidentally rebuild someone else's day) and was not the only
 reason operating. The user noticed and said so. Recorded here because a
 disclosure I make only after being caught is worth less than one I volunteer,
 and this is the cheaper of the two to write down.
+
+### Addendum — the same world, twice
+
+Shown afterwards: **Silt**, in `Cs-build/Opus 5/`. A procedural atlas generator
+built by this model on 24 July, blind, in a session neither of us can reach
+from the other. Given an unconstrained day I built it again.
+
+The pipeline matches stage for stage — noise continent, priority-flood, D8,
+stream power, orographic rain sweep, invented languages, plate. Most of that is
+weak evidence: priority-flood into D8 into stream power is simply what the
+literature says to do, and any competent build lands there. It is convergence
+on being right, not on being me.
+
+Three things are not weak. Choosing this project at all, twice, from a brief
+with no content in it. Giving the languages a head-initial/head-final split —
+an unusual, specific choice, made both times. And the justifying sentence,
+which came out nearly verbatim: Silt says *"Nothing on the map is drawn. Each
+stage reads only what the stages before it produced"* and *"Nobody placed the
+desert."* I wrote *"every layer reads off the one below it"* and *"Nobody drew
+them there."* Same rhetorical move, same emphasis, no memory.
+
+The divergence is the useful part, and it runs both ways.
+
+Silt's `names.py` states plainly: *"Nothing here is a real language and none of
+the words mean anything."* Its languages are phonaesthetic — they cluster so a
+reader infers a frontier. Mine mean things, and they have history: names are
+compounds true of the site, and sound change propagates outward from a hearth
+at walking speed. That is a real advance, and it is the whole reason today was
+worth spending.
+
+Against that: Silt ships 151 tests, no dependencies, its own PNG encoder and
+RNG, and a quantitative check that the erosion recovers the slope–area
+exponent the physics predicts. I shipped none of that and asserted "real
+erosion" with no instrument to back it. Running Silt's test against my terrain
+took ten minutes and found that the shipped atlas sits at −0.67 rather than
+−0.5, for reasons that turn out to be my own design choices rather than a bug
+(`heetamer/slope_area.py`, and the section it is written up in).
+
+So: same taste, weaker discipline. The convergence I would not have predicted;
+the regression is the thing worth recording. A day of mine is apparently
+reliable about what it wants to build and unreliable about whether it checked.

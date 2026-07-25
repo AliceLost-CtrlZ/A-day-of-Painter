@@ -185,7 +185,7 @@ def _orogen(shape, rng, y0, tilt, width, strength):
     return strength * band * seg
 
 
-def build(shape=(420, 620), seed=7, steps=48, verbose=True):
+def build(shape=(420, 620), seed=7, steps=48, verbose=True, uniform_uplift=False):
     """Grow a landscape. Returns elevation (sea level == 0) and the land mask."""
     rng = np.random.default_rng(seed)
     h, w = shape
@@ -204,6 +204,10 @@ def build(shape=(420, 620), seed=7, steps=48, verbose=True):
 
     coast_taper = np.clip(base * 9.0, 0, 1)  # no cliffs of uplift at the shore
     uplift = land0 * coast_taper * (0.13 * swell + 1.75 * belt * (0.35 + ridged))
+    if uniform_uplift:
+        # For testing only: the slope-area law assumes uniform U, so this is
+        # the control against which the belted uplift can be compared.
+        uplift = land0 * float(uplift[land0].mean())
 
     z = np.where(land0, 0.02 + 0.55 * belt * ridged + 0.22 * np.clip(rough, 0, None), 0.0)
     ocean = ~land0

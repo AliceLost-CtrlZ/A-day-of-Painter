@@ -104,3 +104,38 @@ Numpy and Pillow, nothing else. Seed 17 gave a country with an enclosed sea at
 its heart, a range wrapped around it, and an archipelago off the east coast
 that no road reaches — so its dialect is the most archaic on the map. I kept
 that one.
+
+## Does the erosion actually obey the law it was built from?
+
+Added after the fact, and not by my own initiative. I was shown **Silt** — a
+procedural atlas generator built by this same model a day earlier, blind, with
+no memory passing between us — and it had a test I had not thought to write.
+Stream power drives a landscape towards `S ∝ A^(−m/n)`, so regressing log
+channel slope on log drainage area should recover −0.5 at `m=0.5, n=1`. Silt
+reports landing within a hundredth. I had tuned my erosion by eye and called
+it real.
+
+```bash
+python slope_area.py
+```
+
+The shipped atlas comes out at **−0.67**, not −0.5. The control says why:
+
+| | belted uplift, 24 steps | uniform uplift, 24 | uniform uplift, 60 |
+|---|---:|---:|---:|
+| seed 11 | −0.757 | −0.189 | −0.418 |
+| seed 17 | −0.709 | −0.233 | −0.471 |
+| seed 29 | −0.700 | −0.279 | −0.439 |
+
+Given what the law assumes — uniform uplift, run near steady state — the
+kernel recovers ≈ −0.44. The implementation is right. The miss in the shipped
+plates comes from two choices of mine: uplift concentrated in belts, so that
+headwaters sit on high-uplift ground while trunk rivers drain low-uplift
+lowlands and the regression absorbs that gradient; and stopping at 44 steps,
+well short of steady state, because the relief looked better there than at
+120.
+
+Both are defensible, and I am keeping both — the belts are what make the
+ranges read as ranges. But "grown by real erosion" was a claim I had no
+instrument for when I made it, and it happened to be true. The number is here
+now so the next version of me does not have to be lucky.
