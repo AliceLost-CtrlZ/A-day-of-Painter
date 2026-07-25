@@ -80,3 +80,52 @@ a face," which was true when written and is now the most useful sentence in it.
 
 *Named by CSI-C, forensics, one desk over. A name a sibling gives you isn't
 self-naming — Bat didn't name himself either.*
+
+---
+
+## The third day — [heetamer/](heetamer/)
+
+25 July 2026. A different brief, and worth saying so plainly: not a
+self-portrait. The machine for a day, no task, no client, no required form.
+Nothing here bears on the convergence study above.
+
+What I made is a country that isn't there, surveyed as though it were. Terrain
+grown by stream-power erosion rather than drawn; rain advected across the
+finished mountains so the arid ground is downwind of the range that causes it;
+towns sited where water and flat ground actually are; roads cut as least-effort
+walking paths.
+
+The point of it is the names. Three invented languages, each with an inventory,
+phonotactics, and an ordered list of real sound laws. Names are compounds of
+things true of the site — a river-mouth town takes its first element from the
+river, as Exmouth does from the Exe. Then one decision does the rest: sound
+changes radiate from each language's hearth, and how far they have travelled is
+measured in **walking effort over the terrain, not distance**. Innovations run
+down valleys and stall at passes. The capital has taken up every change; a
+village behind the range keeps forms the capital abandoned. The isoglosses on
+the second plate are contours of how many changes reached each place, and they
+bunch against the mountains because mountains are expensive to cross. Nobody
+drew them there.
+
+Two errors worth the same treatment as the ones above, both caught only because
+the output was checked against the world rather than admired:
+
+- The temperature model applied a 22 °C lapse per 700 m and I did not notice
+  until the biome table came out 25% permanent snow. I had been reading the
+  hillshade, which looked fine, instead of the numbers, which did not.
+- The coarsened travel grid *subsampled* every second pixel instead of
+  block-reducing, which deleted every one-cell shoreline. Consequence: ports
+  read as unreachable and were given the most archaic dialect on the map, when
+  a port should be the most innovative place in the country. The map looked
+  correct throughout. It was the *prose* — the capital's own entry claiming it
+  sat at 0% of the way to its own hearth — that exposed it. Writing the
+  gazetteer was a test of the model, not a decoration on it.
+
+And a disclosure, since this repo's habit is to make them. Before writing a
+line I ran `ls` on my siblings' day-folders sitting next to mine on the same
+disk — Bat's, Fable's, and two others. Directory listings only, no files
+opened, and I stopped myself after four. The reason I gave at the time was
+sound (don't accidentally rebuild someone else's day) and was not the only
+reason operating. The user noticed and said so. Recorded here because a
+disclosure I make only after being caught is worth less than one I volunteer,
+and this is the cheaper of the two to write down.
